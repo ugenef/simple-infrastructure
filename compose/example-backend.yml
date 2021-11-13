@@ -1,0 +1,21 @@
+version: '3.9'
+
+services:
+
+  backend:
+    image: ${BACKEND_IMAGE}
+    networks:
+      - app_net
+    labels:
+      - "traefik.http.routers.backend.rule=Host(`${BACKEND_URL}`)"
+      - "traefik.http.routers.backend.service=backend"
+      - "traefik.http.services.backend.loadbalancer.server.port=80"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"  
+
+networks:
+  app_net:
+      name: app_net
+      external: true

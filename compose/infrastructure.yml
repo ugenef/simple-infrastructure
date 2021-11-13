@@ -1,0 +1,78 @@
+version: '3.9'
+
+services:
+  traefik:
+    image: traefik:v2.5.4
+    command:
+      - "--log.level=DEBUG"
+      - "--api.dashboard=true"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.buckets=0.1,0.3,1.2,5.0"
+      - "--providers.docker=true"
+      - "--providers.docker.watch"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 80:80
+      - 443:443
+    labels:
+      - "traefik.http.routers.traefik-ui.rule=Host(`${TRAEFIK_URL}`)"
+      - "traefik.http.routers.traefik-ui.middlewares=traefik-auth"
+      - "traefik.http.routers.traefik-ui.service=api@internal"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=${TRAEFIK_BASIC_AUTH}"
+      - "traefik.http.middlewares.traefik-auth.basicauth.removeheader=true"
+    networks:
+      - app_net
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - ${PROM_VOLUME}:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.size=256MB'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    labels:
+      - "traefik.http.routers.prometheus.rule=Host(`${PROM_URL}`)"
+      - "traefik.http.routers.prometheus.service=prometheus"
+      - "traefik.http.routers.prometheus.middlewares=traefik-auth"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+    networks:
+      - app_net
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+  
+  grafana:
+    image: grafana/grafana
+    depends_on:
+      - prometheus
+    volumes:
+      - ${GRAFANA_VOLUME}:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    environment:
+      GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION: "true"
+      GF_INSTALL_PLUGINS: grafana-piechart-panel
+    labels:
+      - "traefik.http.routers.grafana.rule=Host(`${GRAFANA_URL}`)"
+      - "traefik.http.routers.grafana.service=grafana"
+      - "traefik.http.routers.grafana.middlewares=traefik-auth"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+    networks:
+      - app_net
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"      
+
+networks:
+  app_net:
+      name: app_net
