@@ -10,6 +10,7 @@ services:
       - "traefik.http.routers.backend.rule=Host(`${BACKEND_URL}`)"
       - "traefik.http.routers.backend.service=backend"
       - "traefik.http.services.backend.loadbalancer.server.port=80"
+    restart: unless-stopped
     logging:
       options:
         max-size: "10m"

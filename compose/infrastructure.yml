@@ -14,7 +14,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - 80:80
-      - 443:443
     labels:
       - "traefik.http.routers.traefik-ui.rule=Host(`${TRAEFIK_URL}`)"
       - "traefik.http.routers.traefik-ui.middlewares=traefik-auth"
@@ -23,6 +22,7 @@ services:
       - "traefik.http.middlewares.traefik-auth.basicauth.removeheader=true"
     networks:
       - app_net
+    restart: unless-stopped
     logging:
       options:
         max-size: "10m"
@@ -46,6 +46,7 @@ services:
       - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
     networks:
       - app_net
+    restart: unless-stopped
     logging:
       options:
         max-size: "10m"
@@ -68,6 +69,7 @@ services:
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
     networks:
       - app_net
+    restart: unless-stopped
     logging:
       options:
         max-size: "10m"
