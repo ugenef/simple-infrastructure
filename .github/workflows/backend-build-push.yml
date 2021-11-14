@@ -14,9 +14,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Create image tag
-      run: echo "IMAGE_TAG=ghcr.io/${{ secrets.GHCR_USERNAME }}/simple-pipeline/example-back:${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      run: echo "IMAGE_TAG=ghcr.io/${{ secrets.GHCR_USERNAME }}/simple-infrastructure/example-back:${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
     - name: Build the image
-      run: docker build --file back/Sol.HttpApi/Dockerfile --tag ${{ env.IMAGE_TAG }} example-backend
+      run: docker build --file example-backend/HttpApi/Dockerfile --tag ${{ env.IMAGE_TAG }} example-backend
     - name: Login the registry
       run: docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} -p ${{ secrets.GHCR_TOKEN }}
     - name: Push the image
