@@ -16,10 +16,10 @@ services:
       - 80:80
     labels:
       - "traefik.http.routers.traefik-ui.rule=Host(`${TRAEFIK_URL}`)"
-      - "traefik.http.routers.traefik-ui.middlewares=traefik-auth"
       - "traefik.http.routers.traefik-ui.service=api@internal"
       - "traefik.http.middlewares.traefik-auth.basicauth.users=${TRAEFIK_BASIC_AUTH}"
       - "traefik.http.middlewares.traefik-auth.basicauth.removeheader=true"
+      - "traefik.http.routers.traefik-ui.middlewares=traefik-auth"
     networks:
       - app_net
     restart: unless-stopped
@@ -37,8 +37,6 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
       - '--storage.tsdb.retention.size=256MB'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
     labels:
       - "traefik.http.routers.prometheus.rule=Host(`${PROM_URL}`)"
       - "traefik.http.routers.prometheus.service=prometheus"
