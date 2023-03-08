@@ -10,3 +10,10 @@ Simple startup:
 docker-compose --env-file .env.dev -f infrastructure.yml up -d
 docker-compose --env-file .env.dev -f example-backend.yml up -d
 ```
+
+## Note
+
+Login credentials are:
+
+- User: 'admin'
+- Password: 'admin'
